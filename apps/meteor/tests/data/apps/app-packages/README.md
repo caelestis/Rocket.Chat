@@ -50,17 +50,18 @@ The scratch dir also needs a `package.json` whose `devDependencies["@rocket.chat
 `semver.coerce` can parse — the CLI compares it against `requiredApiVersion` and dies on `Invalid Version: null`
 for something like `"alpha"`. Match the value the other fixtures use so the CLI does not rewrite `app.json`.
 
-Two things that will stop a rebuild, neither of them your app's fault:
+**Keep `rc-apps` current.** It resolves `@rocket.chat/apps-engine` with a `createRequire` rooted at your
+app's own `app.json`, so what it validates against depends on where the app sits. Versions before
+`@rocket.chat/apps-compiler` 0.7.0 look only at `apps-engine/server/permissions/AppPermissions`, a path the
+published package stopped shipping when the engine was split — which makes packaging anywhere outside this
+monorepo die with `MODULE_NOT_FOUND`. 0.7.0 falls back to `definition/metadata/AppPermissions` and tolerates
+the old path being absent. Upgrade with `volta install @rocket.chat/apps-cli`.
 
-- **A new permission is rejected** (`Invalid permission "..." defined`). The CLI validates against
-  `@rocket.chat/apps-engine/server/permissions/AppPermissions`, which is a **stale, gitignored leftover** from
-  before the engine was split into three locations — nothing in `src/` regenerates it, and it does not know any
-  permission added since. Point that file at the current list while you package:
-  `module.exports = require("../../definition/metadata/AppPermissions")`, then restore it. Deleting it instead
-  does not work: the CLI's require throws before it reaches its own "no permissions module" fallback.
-- **A compile error inside `@types/node`** (`Cannot find module 'undici-types'`). The CLI compiles without
-  `skipLibCheck`, so an unrelated types mismatch in the repo fails the build. Typecheck your app on its own
-  first, then package with `--force`, which skips the diagnostics report rather than the compile.
+If a new permission is rejected inside this repo (`Invalid permission "..." defined`) while it packages fine
+elsewhere, the cause is a stale `packages/apps-engine/server/` directory: build output from before the engine
+split that nothing regenerates and `.gitignore` hides. Resolution walks up from your app and finds it, so the
+old path *succeeds* and shadows the current permission list. Delete the directory — nothing in the repo
+imports it, and the compiler then falls through to the live definitions on its own.
 
 ### Available apps
 

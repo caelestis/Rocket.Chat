@@ -68,7 +68,8 @@ stays hidden and the app is never asked for devices.
 
 ```sh
 cd docs/features/cti-desk-phones/sample-app
-rc-apps package --force    # --force: the CLI compiles without skipLibCheck and trips on @types/node
+npm install                # resolves the apps-engine version this app is written against
+rc-apps package
 rc-apps deploy --url http://localhost:3000 --username <admin> --password <password>
 ```
 
@@ -76,19 +77,21 @@ Grant `api`, `persistence`, `slashcommand`, `message.write` and `media-call.cont
 declaring permissions in `app.json` asks for them, it does not grant them, and the write accessor
 answers nothing without `media-call.control`.
 
-If packaging fails with `Invalid permission "media-call.control"`, see the note in
-[`apps/meteor/tests/data/apps/app-packages/README.md`](../../../../apps/meteor/tests/data/apps/app-packages/README.md) —
-the CLI validates against a stale copy of the permission list that predates this feature.
+If packaging fails with `Invalid permission "media-call.control"` or `MODULE_NOT_FOUND` on
+`apps-engine/server/permissions/AppPermissions`, the CLI is reading the wrong permission list — see the note
+in [`apps/meteor/tests/data/apps/app-packages/README.md`](../../../../apps/meteor/tests/data/apps/app-packages/README.md).
 
 ## Trying it
 
 1. Run `/cti-phone +5551234` in any room to register a phone.
-2. Open the call widget and start a new call. The device picker in the footer now lists
-   **Desk phone (+5551234)** next to Rocket.Chat.
-3. Pick it and call someone. Rocket.Chat asks no microphone permission — the audio is not its problem —
-   and the widget rings, then goes active a few seconds later when the sample fakes the answer.
-4. Mute, hold and the keypad all reach the app; the widget settles once the app confirms each back.
-5. For the inbound half, post to the app's `inbound` endpoint. The call arrives on whichever number that
+2. Open the device menu beside your avatar in the navbar. It now lists **Desk phone (+5551234)** next to
+   Rocket.Chat, without a reload — the app tells Rocket.Chat the list changed.
+3. Pick it. The choice is saved on your user and holds until you change it: every call you place goes to
+   that phone, and calls aimed at Rocket.Chat itself are refused.
+4. Call someone. Rocket.Chat asks no microphone permission — the audio is not its problem — and the widget
+   rings, then goes active a few seconds later when the sample fakes the answer.
+5. Mute, hold and the keypad all reach the app; the widget settles once the app confirms each back.
+6. For the inbound half, post to the app's `inbound` endpoint. The call arrives on whichever number that
    user registered, so it answers `409` if they have not run `/cti-phone` yet:
 
 ```sh

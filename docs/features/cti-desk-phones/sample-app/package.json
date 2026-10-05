@@ -4,7 +4,7 @@
     "description": "Reference integration between Rocket.Chat and a CTI gateway for desk-phone calls",
     "private": true,
     "devDependencies": {
-        "@rocket.chat/apps-engine": "1.44.0",
+        "@rocket.chat/apps-engine": "1.68.0-beta.0",
         "typescript": "~5.9.3"
     }
 }
