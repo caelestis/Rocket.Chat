@@ -12,9 +12,15 @@ const RadioButtonElement = ({ block, context, surfaceRenderer }: RadioButtonElem
 
 	return (
 		<Box>
-			{options.map((option: UiKit.Option) => (
+			{options.map((option: UiKit.Option, index) => (
 				<Box key={option.value} paddingBlock={4}>
-					<RadioButton disabled={loading} checked={value === option.value} value={option.value} onChange={action} />
+					<RadioButton
+						autoFocus={block.focus_on_load && index === 0}
+						disabled={loading}
+						checked={value === option.value}
+						value={option.value}
+						onChange={action}
+					/>
 					<Box is='label' paddingInlineStart={8}>
 						{surfaceRenderer.renderTextObject(option.text, 0, UiKit.BlockContext.NONE)}
 					</Box>
