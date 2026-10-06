@@ -83,13 +83,31 @@ describe('ForwardMessageAction', () => {
 		expect(screen.getByRole('button', { name: 'Forward message' })).not.toBeDisabled();
 	});
 
-	// A decrypted message with no text has only files, which cannot leave the source room's key.
-	it('should stay disabled for a decrypted message without text', () => {
+	it('should be enabled for a decrypted message that only carries files', () => {
 		const message = createMockMessage({
 			t: 'e2e',
 			e2e: 'done',
 			msg: '',
-			attachments: [{ title: 'file.png', title_link: '/file-upload/1/file.png' }],
+			attachments: [{ type: 'file', title: 'file.png', title_link: '/file-upload/1/file.png' }],
+		});
+		const room = createFakeRoom();
+
+		render(
+			<FakeRoomProvider roomOverrides={room}>
+				<ForwardMessageAction message={message} room={room} />
+			</FakeRoomProvider>,
+			{ wrapper: appRoot },
+		);
+
+		expect(screen.getByRole('button', { name: 'Forward message' })).not.toBeDisabled();
+	});
+
+	it('should stay disabled for a decrypted message with neither text nor files', () => {
+		const message = createMockMessage({
+			t: 'e2e',
+			e2e: 'done',
+			msg: '',
+			attachments: [],
 		});
 		const room = createFakeRoom();
 

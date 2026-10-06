@@ -22,6 +22,7 @@ import { useMutation } from '@tanstack/react-query';
 import { memo, useId } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 
+import { fetchDecryptedFiles } from './forwardDecryptedFiles';
 import { forwardDecryptedMessage } from './forwardDecryptedMessage';
 import UserAndRoomAutoCompleteMultiple from '../../../../components/UserAndRoomAutoCompleteMultiple';
 import { QuoteAttachment } from '../../../../components/message/content/attachments/QuoteAttachment';
@@ -60,11 +61,12 @@ const ForwardMessageModal = ({ onClose, permalink, message }: ForwardMessageProp
 					quote: {
 						author_name: String(displayName),
 						author_icon: getURL(`/avatar/${message.u.username}`, { full: true }),
-						message_link: permalink,
+						author_link: permalink,
 						text: message.msg,
-						...(message.md && { md: message.md }),
+						mrkdwn_in: ['text'],
 					},
 					roomIds: rooms,
+					files: await fetchDecryptedFiles(message),
 				});
 			}
 

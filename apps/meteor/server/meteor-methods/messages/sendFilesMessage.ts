@@ -53,6 +53,7 @@ export const sendFilesMessage = async (
 			msg: Match.Optional(String),
 			tmid: Match.Optional(String),
 			t: Match.Optional(String),
+			attachments: Match.Optional([Match.Any]),
 			content: Match.Optional(
 				Match.ObjectIncluding({
 					algorithm: String,
@@ -81,7 +82,7 @@ export const sendFilesMessage = async (
 		groupable: false,
 		file: messageFiles[0],
 		files: messageFiles,
-		attachments,
+		attachments: [...(Array.isArray(msgData?.attachments) ? msgData.attachments : []), ...attachments],
 	};
 
 	const msg = await executeSendMessage(userId, data);

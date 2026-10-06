@@ -26,7 +26,7 @@ const getHeightAndWidthFromDataUrl = (dataURL: string): Promise<{ height: number
 	});
 };
 
-const getAttachmentForFile = async (fileToUpload: EncryptedUpload): Promise<FileAttachmentProps> => {
+export const getAttachmentForFile = async (fileToUpload: EncryptedUpload): Promise<FileAttachmentProps> => {
 	const attachment: FileAttachmentProps = {
 		title: fileToUpload.file.name,
 		type: 'file',

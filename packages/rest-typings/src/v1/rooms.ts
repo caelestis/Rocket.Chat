@@ -10,6 +10,7 @@ import type {
 	ISubscription,
 	RequiredField,
 	MessageTypesValues,
+	MessageAttachment,
 } from '@rocket.chat/core-typings';
 
 import { ajv, ajvQuery } from './Ajv';
@@ -191,6 +192,7 @@ export type RoomsMediaConfirmMultipleProps = {
 	tmid?: IMessage['_id'];
 	t?: IMessage['t'];
 	content?: IE2EEMessage['content'];
+	attachments?: MessageAttachment[];
 };
 
 const EncryptedContentSchema = {
@@ -245,6 +247,13 @@ const RoomsMediaConfirmMultipleSchema = {
 			nullable: true,
 		},
 		content: EncryptedContentSchema,
+		attachments: {
+			type: 'array',
+			items: {
+				type: 'object',
+			},
+			nullable: true,
+		},
 	},
 	required: ['rid', 'files'],
 	additionalProperties: false,

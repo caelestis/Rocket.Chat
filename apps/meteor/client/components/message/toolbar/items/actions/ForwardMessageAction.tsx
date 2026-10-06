@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getPermaLink } from '../../../../../lib/getPermaLink';
 import ForwardMessageModal from '../../../../../views/room/modals/ForwardMessageModal';
+import { getForwardableFileAttachments } from '../../../../../views/room/modals/ForwardMessageModal/forwardableAttachments';
 import MessageToolbarItem from '../../MessageToolbarItem';
 
 export type ForwardMessageActionProps = {
@@ -13,12 +14,9 @@ export type ForwardMessageActionProps = {
 	room: IRoom;
 };
 
-/**
- * An E2EE message can be forwarded once this client has decrypted it and there is
- * text to copy; files stay bound to the source room's key and are never forwarded.
- */
+/** An E2EE message can be forwarded once this client has decrypted it and there is text or a file to copy. */
 const isForwardableEncryptedMessage = (message: IMessage): boolean =>
-	isE2EEMessage(message) && message.e2e === 'done' && message.msg.trim().length > 0;
+	isE2EEMessage(message) && message.e2e === 'done' && (message.msg.trim().length > 0 || getForwardableFileAttachments(message).length > 0);
 
 const ForwardMessageAction = ({ message, room }: ForwardMessageActionProps) => {
 	const setModal = useSetModal();
