@@ -15,12 +15,19 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIST=/tmp/rocketchat-dist
 
 cd "$ROOT"
+# The image runs on Alpine (musl): fetch native binaries for both libcs, keep musl below.
+yarn config set supportedArchitectures --json '{"os": ["linux"], "cpu": ["x64"], "libc": ["glibc", "musl"]}'
 yarn install --immutable
 yarn build
 
 rm -rf "$DIST"
 (cd apps/meteor && METEOR_DEBUG_BUILD=1 METEOR_DISABLE_OPTIMISTIC_CACHING=1 meteor build --verbose --server-only --directory "$DIST")
 find "$DIST/bundle" -type f -name '*.d.ts' -delete
+NM="$DIST/bundle/programs/server/npm/node_modules"
+find "$NM/@img" -type d -name 'sharp-*' -not -name '*-linuxmusl-x64' -exec rm -rf {} + 2>/dev/null || true
+find "$NM/@napi-rs" -type d -name 'pinyin-linux-*' -not -name '*-linux-x64-*' -exec rm -rf {} + 2>/dev/null || true
+find "$NM/@esbuild" -type d -name 'linux-*' -not -name '*-x64' -exec rm -rf {} + 2>/dev/null || true
+find "$NM/@rocket.chat/apps/node_modules/@esbuild" -type d -name 'linux-*' -not -name '*-x64' -exec rm -rf {} + 2>/dev/null || true
 cp apps/meteor/.docker/Dockerfile.alpine "$DIST/Dockerfile"
 
 if [ "$PUSH" = "--push" ]; then

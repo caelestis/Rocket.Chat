@@ -46,6 +46,12 @@ jobs:
           curl https://install.meteor.com/?release=$(sed 's/METEOR@//' apps/meteor/.meteor/release) | sh
           echo "$HOME/.meteor" >> "$GITHUB_PATH"
 
+      # The image runs on Alpine (musl) while the runner is glibc: fetch native binaries for
+      # both so the bundle can be trimmed to the musl ones before the Docker build.
+      - name: Fetch native binaries for glibc and musl
+        run: |
+          yarn config set supportedArchitectures --json '{"os": ["linux"], "cpu": ["x64"], "libc": ["glibc", "musl"]}'
+
       - name: Install dependencies
         run: yarn install --immutable
 
@@ -83,6 +89,15 @@ jobs:
 
       - name: Unpack bundle
         run: tar -C /tmp/build -xzf /tmp/build/Rocket.Chat.tar.gz && rm /tmp/build/Rocket.Chat.tar.gz
+
+      - name: Keep only linuxmusl-x64 native binaries
+        run: |
+          NM=/tmp/build/bundle/programs/server/npm/node_modules
+          find "$NM/@img" -type d -name 'sharp-*' -not -name '*-linuxmusl-x64' -exec rm -rf {} + 2>/dev/null || true
+          find "$NM/@napi-rs" -type d -name 'pinyin-linux-*' -not -name '*-linux-x64-*' -exec rm -rf {} + 2>/dev/null || true
+          find "$NM/@esbuild" -type d -name 'linux-*' -not -name '*-x64' -exec rm -rf {} + 2>/dev/null || true
+          find "$NM/@rocket.chat/apps/node_modules/@esbuild" -type d -name 'linux-*' -not -name '*-x64' -exec rm -rf {} + 2>/dev/null || true
+          ls "$NM/@img"
 
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3

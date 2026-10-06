@@ -75,6 +75,12 @@ tags of one upstream release.
   apps (`docs/features/voice-transcription.md`). It is copied as a static binary from
   the `mwader/static-ffmpeg` image, so no package repository is involved.
 
+Native modules (`sharp`, `esbuild`, `pinyin`) ship platform binaries. The runner is
+glibc and the image is Alpine (musl), so Yarn is told to fetch both flavours and the
+bundle is trimmed to the `linuxmusl-x64` ones before the Docker build, exactly as
+upstream CI does. Skipping either step yields an image that crashes on start with
+"Could not load the sharp module using the linuxmusl-x64 runtime".
+
 `Dockerfile.debian` is left untouched and is not used: the Debian release it is based
 on no longer serves its security archive, so even upstream's own package list fails
 to install there today.
