@@ -500,6 +500,39 @@ describe('[Rooms]', () => {
 				});
 		});
 
+		it('should confirm several uploads as one message', async () => {
+			const upload = async (path: string): Promise<string> => {
+				const res = await request
+					.post(api(`rooms.media/${testChannel._id}`))
+					.set(credentials)
+					.attach('file', path)
+					.expect(200);
+				return res.body.file._id;
+			};
+			const fileIds = [await upload(imgURL), await upload(lstURL)];
+
+			await request
+				.post(api('rooms.mediaConfirmMultiple'))
+				.set(credentials)
+				.send({
+					rid: testChannel._id,
+					msg: 'grouped files',
+					files: fileIds.map((fileId, index) => ({ fileId, description: `file ${index}` })),
+				})
+				.expect('Content-Type', 'application/json')
+				.expect(200)
+				.expect((res) => {
+					expect(res.body).to.have.property('success', true);
+					expect(res.body.message).to.have.property('msg', 'grouped files');
+					expect(res.body.message.attachments).to.be.an('array').of.length(2);
+					expect(res.body.message.attachments[0]).to.have.property('title', '1024x1024.png');
+					expect(res.body.message.attachments[0]).to.have.property('image_alt', 'file 0');
+					expect(res.body.message.attachments[1]).to.have.property('format', 'LST');
+					expect(res.body.message.attachments[1]).to.have.property('description', 'file 1');
+					expect(res.body.message.files.map((file: { _id: string }) => file._id)).to.include.members(fileIds);
+				});
+		});
+
 		it('should upload a LST file to room', async () => {
 			let fileId;
 			await request

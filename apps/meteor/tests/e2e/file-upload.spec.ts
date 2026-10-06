@@ -55,7 +55,7 @@ test.describe.serial('file-upload', () => {
 		await expect(poHomeChannel.content.getLastMessageByFileName(updatedFileName)).toContainText(updatedFileName);
 	});
 
-	test('should attach multiple files and send one per message', async () => {
+	test('should attach multiple files and send them as one message', async () => {
 		await poHomeChannel.content.dragAndDropTxtFile();
 		await poHomeChannel.content.dragAndDropLstFile();
 
@@ -64,7 +64,9 @@ test.describe.serial('file-upload', () => {
 		await expect(poHomeChannel.composer.getFileByName(TEST_FILE_LST)).toBeVisible();
 
 		await poHomeChannel.composer.btnSend.click();
-		await expect(poHomeChannel.content.lastUserMessageDownloadLink).toHaveCount(1);
+		await expect(poHomeChannel.content.lastUserMessageDownloadLink).toHaveCount(2);
+		await expect(poHomeChannel.content.lastUserMessage.getByRole('link', { name: TEST_FILE_TXT })).toBeVisible();
+		await expect(poHomeChannel.content.lastUserMessage.getByRole('link', { name: TEST_FILE_LST })).toBeVisible();
 	});
 
 	test('should not be able to attach files when editing a message', async () => {

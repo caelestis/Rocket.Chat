@@ -47,10 +47,10 @@ describe('ForwardMessageAction', () => {
 		expect(screen.getByRole('button', { name: 'Forward message' })).not.toBeDisabled();
 	});
 
-	it('should be disabled for encrypted messages', () => {
+	it('should be disabled while an encrypted message is still pending decryption', () => {
 		const message = createMockMessage({
 			t: 'e2e',
-			e2e: 'encrypted',
+			e2e: 'pending',
 		});
 		const room = createFakeRoom();
 
@@ -63,6 +63,44 @@ describe('ForwardMessageAction', () => {
 
 		const button = screen.getByRole('button', { name: 'Action not available for encrypted content' });
 		expect(button).toBeDisabled();
+	});
+
+	it('should be enabled once an encrypted message is decrypted and has text', () => {
+		const message = createMockMessage({
+			t: 'e2e',
+			e2e: 'done',
+			msg: 'decrypted text',
+		});
+		const room = createFakeRoom();
+
+		render(
+			<FakeRoomProvider roomOverrides={room}>
+				<ForwardMessageAction message={message} room={room} />
+			</FakeRoomProvider>,
+			{ wrapper: appRoot },
+		);
+
+		expect(screen.getByRole('button', { name: 'Forward message' })).not.toBeDisabled();
+	});
+
+	// A decrypted message with no text has only files, which cannot leave the source room's key.
+	it('should stay disabled for a decrypted message without text', () => {
+		const message = createMockMessage({
+			t: 'e2e',
+			e2e: 'done',
+			msg: '',
+			attachments: [{ title: 'file.png', title_link: '/file-upload/1/file.png' }],
+		});
+		const room = createFakeRoom();
+
+		render(
+			<FakeRoomProvider roomOverrides={room}>
+				<ForwardMessageAction message={message} room={room} />
+			</FakeRoomProvider>,
+			{ wrapper: appRoot },
+		);
+
+		expect(screen.getByRole('button', { name: 'Action not available for encrypted content' })).toBeDisabled();
 	});
 
 	it('should be disabled for ABAC rooms', () => {
@@ -86,7 +124,7 @@ describe('ForwardMessageAction', () => {
 	it('should be disabled for both encrypted messages and ABAC rooms', () => {
 		const message = createMockMessage({
 			t: 'e2e',
-			e2e: 'encrypted',
+			e2e: 'pending',
 		});
 		const room = createFakeRoom({
 			// @ts-expect-error - abacAttributes is not yet implemented in IRoom type
@@ -121,7 +159,7 @@ describe('ForwardMessageAction', () => {
 	it('should have no accessibility violations for encrypted messages', async () => {
 		const message = createMockMessage({
 			t: 'e2e',
-			e2e: 'encrypted',
+			e2e: 'pending',
 		});
 		const room = createFakeRoom();
 

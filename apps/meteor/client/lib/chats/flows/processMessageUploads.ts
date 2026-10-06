@@ -8,7 +8,7 @@ import { e2e } from '../../e2ee/rocketchat.e2e';
 import type { E2ERoom } from '../../e2ee/rocketchat.e2e.room';
 import { dispatchToastMessage } from '../../toast';
 import type { ChatAPI, UploadsAPI } from '../ChatAPI';
-import { isEncryptedUpload, type EncryptedUpload } from '../Upload';
+import { isEncryptedUpload, type EncryptedUpload, type Upload } from '../Upload';
 
 const getHeightAndWidthFromDataUrl = (dataURL: string): Promise<{ height: number; width: number }> => {
 	return new Promise((resolve, reject) => {
@@ -91,6 +91,62 @@ const getEncryptedContent = async (filesToUpload: readonly EncryptedUpload[], e2
 	});
 };
 
+const isReadyUpload = (upload: Upload): upload is Upload & { url: string; id: string } => Boolean(upload.url && upload.id);
+
+/**
+ * Whether these uploads can travel as one message: either none is encrypted, or every one
+ * is and the room can encrypt. A mix falls back to one message per file.
+ */
+const canGroupUploads = (uploads: readonly Upload[], e2eRoom: E2ERoom | null): boolean => {
+	if (uploads.length < 2) {
+		return false;
+	}
+
+	const encryptedCount = uploads.filter(isEncryptedUpload).length;
+
+	return encryptedCount === 0 || (!!e2eRoom && encryptedCount === uploads.length);
+};
+
+async function sendGroupedFiles(
+	store: UploadsAPI,
+	message: IMessage,
+	e2eRoom: E2ERoom | null,
+	uploads: readonly (Upload & { url: string; id: string })[],
+): Promise<void> {
+	const { msg, rid, tmid } = message;
+	const encryptedUploads = uploads.filter((upload): upload is EncryptedUpload & { url: string; id: string } => isEncryptedUpload(upload));
+	const encrypted = !!e2eRoom && encryptedUploads.length === uploads.length;
+
+	const files = await Promise.all(
+		uploads.map(async (upload) => ({
+			fileId: upload.id,
+			...(encrypted && e2eRoom && isEncryptedUpload(upload)
+				? { fileContent: await e2eRoom.encryptMessageContent(upload.metadataForEncryption) }
+				: { fileName: upload.file.name, description: upload.altText || undefined }),
+		})),
+	);
+
+	const content =
+		encrypted && e2eRoom && (await e2eRoom.shouldConvertSentMessages({ msg }))
+			? await getEncryptedContent(encryptedUploads, e2eRoom, msg)
+			: undefined;
+
+	try {
+		store.setProcessingUploads(true);
+		await sdk.rest.post('/v1/rooms.mediaConfirmMultiple', {
+			rid,
+			tmid,
+			files,
+			...(encrypted ? { t: 'e2e' as const, msg: '', content } : { msg }),
+		});
+		uploads.forEach((upload) => store.removeUpload(upload.id));
+	} catch (error: unknown) {
+		dispatchToastMessage({ type: 'error', message: error });
+	} finally {
+		store.setProcessingUploads(false);
+	}
+}
+
 async function continueSendingMessage(store: UploadsAPI, message: IMessage) {
 	const { msg, rid, tmid } = message;
 	const e2eRoom = await e2e.getInstanceByRoomId(rid);
@@ -106,6 +162,12 @@ async function continueSendingMessage(store: UploadsAPI, message: IMessage) {
 	})[] = [];
 
 	const validFiles = filesToUpload.filter((file) => !file.error);
+	const readyFiles = validFiles.filter(isReadyUpload);
+
+	if (canGroupUploads(readyFiles, e2eRoom)) {
+		await sendGroupedFiles(store, message, e2eRoom, readyFiles);
+		return true;
+	}
 
 	for (const upload of validFiles) {
 		if (!upload.url || !upload.id) {

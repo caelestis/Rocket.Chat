@@ -3080,6 +3080,7 @@
   "Format": "Format",
   "Forward": "Forward",
   "Forward_chat": "Forward chat",
+  "Forward_encrypted_message_hint": "Only the decrypted text and its author are copied. Files are not forwarded. The copy is encrypted again for each encrypted room it is sent to.",
   "Forward_in_history": "Forward in history",
   "Forward_message": "Forward message",
   "Forward_to_department": "Forward to department",

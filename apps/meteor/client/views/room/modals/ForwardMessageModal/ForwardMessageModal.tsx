@@ -1,4 +1,5 @@
 import type { IMessage, MessageQuoteAttachment } from '@rocket.chat/core-typings';
+import { isE2EEMessage } from '@rocket.chat/core-typings';
 import {
 	Modal,
 	Field,
@@ -21,8 +22,10 @@ import { useMutation } from '@tanstack/react-query';
 import { memo, useId } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 
+import { forwardDecryptedMessage } from './forwardDecryptedMessage';
 import UserAndRoomAutoCompleteMultiple from '../../../../components/UserAndRoomAutoCompleteMultiple';
 import { QuoteAttachment } from '../../../../components/message/content/attachments/QuoteAttachment';
+import { getURL } from '../../../../lib/getURL';
 import { prependReplies } from '../../../../lib/utils/prependReplies';
 
 type ForwardMessageProps = {
@@ -47,8 +50,24 @@ const ForwardMessageModal = ({ onClose, permalink, message }: ForwardMessageProp
 	const rooms = watch('rooms');
 	const sendMessage = useEndpoint('POST', '/v1/chat.postMessage');
 
+	const encrypted = isE2EEMessage(message);
+	const displayName = useUserDisplayName(message.u);
+
 	const sendMessageMutation = useMutation({
 		mutationFn: async () => {
+			if (encrypted) {
+				return forwardDecryptedMessage({
+					quote: {
+						author_name: String(displayName),
+						author_icon: getURL(`/avatar/${message.u.username}`, { full: true }),
+						message_link: permalink,
+						text: message.msg,
+						...(message.md && { md: message.md }),
+					},
+					roomIds: rooms,
+				});
+			}
+
 			const optionalMessage = '';
 			const curMsg = await prependReplies(optionalMessage, [message]);
 			const sendPayload = {
@@ -71,15 +90,13 @@ const ForwardMessageModal = ({ onClose, permalink, message }: ForwardMessageProp
 
 	const avatarUrl = getUserAvatarPath(message.u.username);
 
-	const displayName = useUserDisplayName(message.u);
-
 	const attachment = {
 		author_name: String(displayName),
 		author_link: '',
 		author_icon: avatarUrl,
 		message_link: '',
 		text: message.msg,
-		attachments: message.attachments as MessageQuoteAttachment[],
+		...(!encrypted && { attachments: message.attachments as MessageQuoteAttachment[] }),
 		md: message.md,
 	};
 
@@ -121,6 +138,7 @@ const ForwardMessageModal = ({ onClose, permalink, message }: ForwardMessageProp
 					</Field>
 					<Field>
 						<QuoteAttachment attachment={attachment} />
+						{encrypted && <FieldHint>{t('Forward_encrypted_message_hint')}</FieldHint>}
 					</Field>
 				</FieldGroup>
 			</ModalContent>

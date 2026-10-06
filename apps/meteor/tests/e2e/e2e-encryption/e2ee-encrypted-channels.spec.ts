@@ -135,12 +135,37 @@ test.describe('E2EE Encrypted Channels', () => {
 		await expect(poHomeChannel.content.lastUserMessage.locator('.rcx-icon--name-key')).toBeVisible();
 
 		await poHomeChannel.content.lastUserMessage.hover();
-		await expect(page.locator('role=button[name="Forward message not available on encrypted content"]')).toBeDisabled();
+		await expect(page.locator('role=button[name="Forward message"]')).toBeEnabled();
 
 		await poHomeChannel.content.openLastMessageMenu();
 
 		await expect(page.locator('role=menuitem[name="Reply in direct message"]')).toHaveClass(/disabled/);
 		await expect(page.locator('role=menuitem[name="Copy link"]')).toHaveClass(/disabled/);
+	});
+
+	test('expect forward a decrypted message into another encrypted channel', async ({ page }) => {
+		const sourceChannel = faker.string.uuid();
+		const targetChannel = faker.string.uuid();
+		const message = 'This encrypted message will be forwarded.';
+
+		await createE2EEChannel.createAndStore(targetChannel, createdChannels);
+		await createE2EEChannel.createAndStore(sourceChannel, createdChannels);
+
+		await expect(page).toHaveURL(`/group/${sourceChannel}`);
+		await expect(poHomeChannel.content.encryptedRoomHeaderIcon).toBeVisible();
+
+		await poHomeChannel.content.sendMessage(message);
+		await expect(poHomeChannel.content.lastUserMessageBody).toHaveText(message);
+		await expect(poHomeChannel.content.lastUserMessage.locator('.rcx-icon--name-key')).toBeVisible();
+
+		await poHomeChannel.content.forwardMessage(targetChannel);
+
+		await poHomeChannel.navbar.openChat(targetChannel);
+		await expect(page).toHaveURL(`/group/${targetChannel}`);
+
+		await expect(poHomeChannel.content.lastUserMessage).toContainText(message);
+		await expect(poHomeChannel.content.lastUserMessage).toContainText(Users.userE2EE.data.username);
+		await expect(poHomeChannel.content.lastUserMessage.locator('.rcx-icon--name-key')).toBeVisible();
 	});
 
 	test('expect create a private channel, encrypt it and send an encrypted message', async ({ page }) => {

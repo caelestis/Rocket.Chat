@@ -179,6 +179,79 @@ const RoomsCreateDiscussionSchema = {
 
 export const isRoomsCreateDiscussionProps = ajv.compile<RoomsCreateDiscussionProps>(RoomsCreateDiscussionSchema);
 
+export type RoomsMediaConfirmMultipleProps = {
+	rid: IRoom['_id'];
+	files: {
+		fileId: IUpload['_id'];
+		fileName?: string;
+		description?: string;
+		fileContent?: IE2EEMessage['content'];
+	}[];
+	msg?: string;
+	tmid?: IMessage['_id'];
+	t?: IMessage['t'];
+	content?: IE2EEMessage['content'];
+};
+
+const EncryptedContentSchema = {
+	type: 'object',
+	properties: {
+		algorithm: { type: 'string' },
+		ciphertext: { type: 'string' },
+	},
+	required: ['algorithm', 'ciphertext'],
+	nullable: true,
+};
+
+const RoomsMediaConfirmMultipleSchema = {
+	type: 'object',
+	properties: {
+		rid: {
+			type: 'string',
+		},
+		files: {
+			type: 'array',
+			minItems: 1,
+			items: {
+				type: 'object',
+				properties: {
+					fileId: {
+						type: 'string',
+					},
+					fileName: {
+						type: 'string',
+						nullable: true,
+					},
+					description: {
+						type: 'string',
+						nullable: true,
+					},
+					fileContent: EncryptedContentSchema,
+				},
+				required: ['fileId'],
+				additionalProperties: false,
+			},
+		},
+		msg: {
+			type: 'string',
+			nullable: true,
+		},
+		tmid: {
+			type: 'string',
+			nullable: true,
+		},
+		t: {
+			type: 'string',
+			nullable: true,
+		},
+		content: EncryptedContentSchema,
+	},
+	required: ['rid', 'files'],
+	additionalProperties: false,
+};
+
+export const isRoomsMediaConfirmMultipleProps = ajv.compile<RoomsMediaConfirmMultipleProps>(RoomsMediaConfirmMultipleSchema);
+
 type RoomsExportProps = RoomsExportFileProps | RoomsExportEmailProps;
 
 type RoomsExportFileProps = {
@@ -963,6 +1036,12 @@ export type RoomsEndpoints = {
 
 	'/v1/rooms.media/:rid': {
 		POST: (params: { file: File }) => { file: { url: string } };
+	};
+
+	'/v1/rooms.mediaConfirmMultiple': {
+		POST: (params: RoomsMediaConfirmMultipleProps) => {
+			message: IMessage | null;
+		};
 	};
 
 	'/v1/rooms.mediaConfirm/:rid/:fileId': {

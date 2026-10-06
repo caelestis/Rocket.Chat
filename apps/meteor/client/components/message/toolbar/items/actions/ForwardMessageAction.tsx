@@ -13,29 +13,36 @@ export type ForwardMessageActionProps = {
 	room: IRoom;
 };
 
+/**
+ * An E2EE message can be forwarded once this client has decrypted it and there is
+ * text to copy; files stay bound to the source room's key and are never forwarded.
+ */
+const isForwardableEncryptedMessage = (message: IMessage): boolean =>
+	isE2EEMessage(message) && message.e2e === 'done' && message.msg.trim().length > 0;
+
 const ForwardMessageAction = ({ message, room }: ForwardMessageActionProps) => {
 	const setModal = useSetModal();
 	const { t } = useTranslation();
 
-	const encrypted = isE2EEMessage(message);
+	const encryptedContentUnavailable = isE2EEMessage(message) && !isForwardableEncryptedMessage(message);
 	const isABACEnabled = !!room.abacAttributes;
 
 	const getTitle = useMemo(() => {
-		if (encrypted) {
+		if (encryptedContentUnavailable) {
 			return t('Action_not_available_encrypted_content', { action: t('Forward_message') });
 		}
 		if (isABACEnabled) {
 			return t('Not_available_for_ABAC_enabled_rooms');
 		}
 		return t('Forward_message');
-	}, [encrypted, isABACEnabled, t]);
+	}, [encryptedContentUnavailable, isABACEnabled, t]);
 
 	return (
 		<MessageToolbarItem
 			id='forward-message'
 			icon='arrow-forward'
 			title={getTitle}
-			disabled={encrypted || isABACEnabled}
+			disabled={encryptedContentUnavailable || isABACEnabled}
 			onClick={async () => {
 				const permalink = await getPermaLink(message._id);
 				setModal(
