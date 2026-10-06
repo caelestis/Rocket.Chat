@@ -68,6 +68,7 @@ export const permissions = [
 	{ _id: 'send-many-messages', roles: ['admin', 'bot', 'app'] },
 	{ _id: 'set-leader', roles: ['admin', 'owner'] },
 	{ _id: 'start-discussion', roles: ['admin', 'user', 'federated-external', 'guest', 'app'] },
+	{ _id: 'transcribe-voice-messages', roles: ['admin', 'user'] },
 	{ _id: 'start-discussion-other-user', roles: ['admin', 'user', 'federated-external', 'owner', 'app'] },
 	{ _id: 'unarchive-room', roles: ['admin'] },
 	{ _id: 'view-c-room', roles: ['admin', 'user', 'federated-external', 'bot', 'app', 'anonymous'] },

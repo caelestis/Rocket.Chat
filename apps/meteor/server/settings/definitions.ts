@@ -31,6 +31,7 @@ import { createSetupWSettings } from './setup-wizard';
 import { createSlackBridgeSettings } from './slackbridge';
 import { createSmarshSettings } from './smarsh';
 import { createThreadSettings } from './threads';
+import { createTranscriptionSettings } from './transcription';
 import { createTroubleshootSettings } from './troubleshoot';
 import { createUserDataSettings } from './userDataDownload';
 import { createVConfSettings } from './video-conference';
@@ -64,6 +65,7 @@ await Promise.all([
 	createOauthSettings(),
 	createOmniSettings(),
 	createPushSettings(),
+	createTranscriptionSettings(),
 	createRateLimitSettings(),
 	createRetentionSettings(),
 	createSetupWSettings(),

@@ -14,6 +14,7 @@ import BroadcastMetrics from '../../content/BroadcastMetrics';
 import DiscussionMetrics from '../../content/DiscussionMetrics';
 import Location from '../../content/Location';
 import MessageActions from '../../content/MessageActions';
+import MessageTranscription from '../../content/MessageTranscription';
 import Reactions from '../../content/Reactions';
 import ThreadMetrics from '../../content/ThreadMetrics';
 import UrlPreviews from '../../content/UrlPreviews';
@@ -86,6 +87,8 @@ const RoomMessageContent = ({ message, unread, all, mention, searchText }: RoomM
 					source={{ rid: message.rid, mid: message._id, username: message.u.username, name: message.u.name }}
 				/>
 			)}
+
+			<MessageTranscription mid={message._id} />
 
 			{normalizedMessage.blocks && (
 				<UiKitMessageBlock rid={normalizedMessage.rid} mid={normalizedMessage._id} blocks={normalizedMessage.blocks} />

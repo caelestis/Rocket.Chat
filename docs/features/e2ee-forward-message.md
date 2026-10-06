@@ -47,4 +47,5 @@ expands it into a quote.
   decides when the action is available.
 - `apps/meteor/client/views/room/modals/ForwardMessageModal/` builds the author
   card and, for encrypted sources, sends it via `forwardDecryptedMessage`;
-  `forwardDecryptedFiles.ts` downloads, decrypts and re-uploads the files.
+  `forwardDecryptedFiles.ts` re-uploads the files it gets from
+  `apps/meteor/client/lib/files/fetchDecryptedFiles.ts`, which downloads and decrypts them.

@@ -1,6 +1,6 @@
-import type { IMessage, MessageAttachmentDefault } from '@rocket.chat/core-typings';
+import type { MessageAttachmentDefault } from '@rocket.chat/core-typings';
 
-import { fetchDecryptedFiles, forwardFilesToRoom } from './forwardDecryptedFiles';
+import { forwardFilesToRoom } from './forwardDecryptedFiles';
 import { uploadFileToRoom } from './uploadFileToRoom';
 import { sdk } from '../../../../lib/SDKClient';
 import { e2e } from '../../../../lib/e2ee';
@@ -19,14 +19,6 @@ const mockedPeek = jest.mocked(settings.peek);
 const mockedUpload = jest.mocked(uploadFileToRoom);
 
 const authorCard: MessageAttachmentDefault = { author_name: 'Alice', text: 'caption' };
-
-// jsdom's Blob has no text(); FileReader is the portable way to read it back.
-const readBlob = (blob: Blob): Promise<string> =>
-	new Promise((resolve) => {
-		const reader = new FileReader();
-		reader.onload = () => resolve(String(reader.result));
-		reader.readAsText(blob);
-	});
 
 const plainFile = { name: 'notes.txt', type: 'text/plain', blob: new Blob(['hello'], { type: 'text/plain' }), description: 'desc' };
 
@@ -56,67 +48,6 @@ beforeEach(() => {
 	mockedUpload.mockImplementation(async () => {
 		counter += 1;
 		return { _id: `upload-${counter}`, url: `/file-upload/upload-${counter}/x` };
-	});
-});
-
-describe('fetchDecryptedFiles', () => {
-	const decryptSpy = jest.fn(async () => new TextEncoder().encode('decrypted bytes').buffer);
-
-	beforeEach(() => {
-		Object.defineProperty(globalThis, 'crypto', {
-			configurable: true,
-			value: { subtle: { importKey: jest.fn(async () => 'crypto-key'), decrypt: decryptSpy } },
-		});
-		global.fetch = jest.fn(async () => ({
-			ok: true,
-			headers: new Headers({ 'content-type': 'application/octet-stream' }),
-			arrayBuffer: async () => new TextEncoder().encode('stored bytes').buffer,
-		})) as unknown as typeof fetch;
-	});
-
-	it('fetches the stored file behind the decrypting link and decrypts it with the attachment key', async () => {
-		const message = {
-			attachments: [
-				{
-					type: 'file',
-					title: 'voice.mp3',
-					title_link: '/file-decrypt/file-upload/abc/voice.mp3?key=secret',
-					audio_url: '/file-decrypt/file-upload/abc/voice.mp3?key=secret',
-					audio_type: 'audio/mpeg',
-					encryption: { key: { kty: 'oct', k: 'k' }, iv: 'aXY=' },
-				},
-			],
-		} as unknown as IMessage;
-
-		const [file] = await fetchDecryptedFiles(message);
-
-		expect(global.fetch).toHaveBeenCalledWith('/file-upload/abc/voice.mp3', { credentials: 'include' });
-		expect(decryptSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'AES-CTR', length: 64 }), 'crypto-key', expect.anything());
-		expect(file).toMatchObject({ name: 'voice.mp3', type: 'audio/mpeg' });
-		expect(await readBlob(file.blob)).toBe('decrypted bytes');
-	});
-
-	it('keeps a plain upload as is and takes its caption from the attachment', async () => {
-		const message = {
-			attachments: [{ type: 'file', title: 'doc.pdf', title_link: '/file-upload/def/doc.pdf', description: 'the doc' }],
-		} as unknown as IMessage;
-
-		const [file] = await fetchDecryptedFiles(message);
-
-		expect(decryptSpy).not.toHaveBeenCalled();
-		expect(file).toMatchObject({ name: 'doc.pdf', type: 'application/octet-stream', description: 'the doc' });
-		expect(await readBlob(file.blob)).toBe('stored bytes');
-	});
-
-	it('skips attachments whose file was removed', async () => {
-		const message = {
-			attachments: [
-				{ type: 'file', title: 'gone.png', title_link: '/file-upload/x/gone.png', encryption: undefined },
-				{ color: '#f00', text: 'not a file' },
-			],
-		} as unknown as IMessage;
-
-		await expect(fetchDecryptedFiles(message)).resolves.toHaveLength(1);
 	});
 });
 

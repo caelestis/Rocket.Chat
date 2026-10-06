@@ -22,10 +22,10 @@ import { useMutation } from '@tanstack/react-query';
 import { memo, useId } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 
-import { fetchDecryptedFiles } from './forwardDecryptedFiles';
 import { forwardDecryptedMessage } from './forwardDecryptedMessage';
 import UserAndRoomAutoCompleteMultiple from '../../../../components/UserAndRoomAutoCompleteMultiple';
 import { QuoteAttachment } from '../../../../components/message/content/attachments/QuoteAttachment';
+import { fetchDecryptedFiles } from '../../../../lib/files/fetchDecryptedFiles';
 import { getURL } from '../../../../lib/getURL';
 import { prependReplies } from '../../../../lib/utils/prependReplies';
 

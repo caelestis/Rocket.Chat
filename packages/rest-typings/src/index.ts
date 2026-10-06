@@ -43,6 +43,7 @@ import type { SetupWizardEndpoints } from './v1/setupWizard';
 import type { StatisticsEndpoints } from './v1/statistics';
 import type { SubscriptionsEndpoints } from './v1/subscriptionsEndpoints';
 import type { TeamsEndpoints } from './v1/teams';
+import type { TranscriptionEndpoints } from './v1/transcription';
 import type { TwoFactorChallengesEndpoints } from './v1/twoFactorChallenges';
 import type { UsersEndpoints } from './v1/users';
 import type { VideoConferenceEndpoints } from './v1/videoConference';
@@ -67,6 +68,7 @@ export interface Endpoints
 		ImEndpoints,
 		LDAPEndpoints,
 		RoomsEndpoints,
+		TranscriptionEndpoints,
 		PushEndpoints,
 		RolesEndpoints,
 		TeamsEndpoints,

@@ -11,6 +11,8 @@ jest.mock('../../../../../lib/getPermaLink', () => ({
 	getPermaLink: jest.fn(() => Promise.resolve(null)),
 }));
 
+jest.mock('../../../../../lib/getURL', () => ({ getURL: (path: string) => path }));
+
 jest.mock('../../../../../views/room/modals/ForwardMessageModal', () => ({
 	getPermaLink: jest.fn(() => null),
 }));

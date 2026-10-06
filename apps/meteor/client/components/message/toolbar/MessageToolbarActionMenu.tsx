@@ -19,6 +19,7 @@ import { useReplyInDMAction } from './useReplyInDMAction';
 import { useReportMessageAction } from './useReportMessageAction';
 import { useShowMessageReactionsAction } from './useShowMessageReactionsAction';
 import { useStarMessageAction } from './useStarMessageAction';
+import { useTranscribeVoiceMessageAction } from './useTranscribeVoiceMessageAction';
 import { useTranslateAction } from './useTranslateAction';
 import { useUnFollowMessageAction } from './useUnFollowMessageAction';
 import { useUnpinMessageAction } from './useUnpinMessageAction';
@@ -68,6 +69,7 @@ const MessageToolbarActionMenu = ({ message, context, room, subscription, onChan
 		useTranslateAction(message, { room, subscription }),
 		useViewOriginalTranslationAction(message, { room, subscription }),
 		useReplyInDMAction(message, { room, subscription }),
+		useTranscribeVoiceMessageAction(message, { subscription }),
 		useCopyAction(message, { subscription }),
 		useEditMessageAction(message, { room, subscription }),
 		useDeleteMessageAction(message, { room, subscription }),

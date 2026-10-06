@@ -12,6 +12,7 @@ import Attachments from '../../content/Attachments';
 import BroadcastMetrics from '../../content/BroadcastMetrics';
 import Location from '../../content/Location';
 import MessageActions from '../../content/MessageActions';
+import MessageTranscription from '../../content/MessageTranscription';
 import Reactions from '../../content/Reactions';
 import UrlPreviews from '../../content/UrlPreviews';
 import { useNormalizedMessage } from '../../hooks/useNormalizedMessage';
@@ -82,6 +83,8 @@ const ThreadMessageContent = ({ message }: ThreadMessageContentProps) => {
 					source={{ rid: message.rid, mid: message._id, username: message.u.username, name: message.u.name }}
 				/>
 			)}
+
+			<MessageTranscription mid={message._id} />
 
 			{oembedEnabled && !!normalizedMessage.urls?.length && <UrlPreviews urls={normalizedMessage.urls} />}
 

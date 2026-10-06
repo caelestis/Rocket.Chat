@@ -1,8 +1,9 @@
 import type { IMessage, MessageAttachmentDefault } from '@rocket.chat/core-typings';
 import { Random } from '@rocket.chat/random';
 
-import { forwardFilesToRoom, type ForwardableFile } from './forwardDecryptedFiles';
+import { forwardFilesToRoom } from './forwardDecryptedFiles';
 import { sdk } from '../../../../lib/SDKClient';
+import type { DecryptedFile } from '../../../../lib/files/fetchDecryptedFiles';
 import { onClientBeforeSendMessage } from '../../../../lib/onClientBeforeSendMessage';
 
 type ForwardDecryptedMessageParams = {
@@ -14,7 +15,7 @@ type ForwardDecryptedMessageParams = {
 	quote: MessageAttachmentDefault;
 	roomIds: IMessage['rid'][];
 	/** Decrypted copies of the original's files; when present each room gets them re-uploaded under the author card. */
-	files?: ForwardableFile[];
+	files?: DecryptedFile[];
 };
 
 /**

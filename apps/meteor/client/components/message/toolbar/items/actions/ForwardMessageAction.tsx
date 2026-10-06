@@ -4,9 +4,9 @@ import { useSetModal } from '@rocket.chat/ui-contexts';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { getFileAttachments } from '../../../../../lib/files/fetchDecryptedFiles';
 import { getPermaLink } from '../../../../../lib/getPermaLink';
 import ForwardMessageModal from '../../../../../views/room/modals/ForwardMessageModal';
-import { getForwardableFileAttachments } from '../../../../../views/room/modals/ForwardMessageModal/forwardableAttachments';
 import MessageToolbarItem from '../../MessageToolbarItem';
 
 export type ForwardMessageActionProps = {
@@ -16,7 +16,7 @@ export type ForwardMessageActionProps = {
 
 /** An E2EE message can be forwarded once this client has decrypted it and there is text or a file to copy. */
 const isForwardableEncryptedMessage = (message: IMessage): boolean =>
-	isE2EEMessage(message) && message.e2e === 'done' && (message.msg.trim().length > 0 || getForwardableFileAttachments(message).length > 0);
+	isE2EEMessage(message) && message.e2e === 'done' && (message.msg.trim().length > 0 || getFileAttachments(message).length > 0);
 
 const ForwardMessageAction = ({ message, room }: ForwardMessageActionProps) => {
 	const setModal = useSetModal();
