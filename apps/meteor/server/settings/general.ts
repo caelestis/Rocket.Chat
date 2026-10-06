@@ -295,6 +295,11 @@ export const createGeneralSettings = async () => {
 				public: true,
 				i18nDescription: 'Notifications_Max_Room_Members_Description',
 			});
+			await this.add('Notifications_On_Reactions', true, {
+				type: 'boolean',
+				public: true,
+				i18nDescription: 'Notifications_On_Reactions_Description',
+			});
 		});
 		await this.section('REST API', async function () {
 			return this.add('API_User_Limit', 500, {

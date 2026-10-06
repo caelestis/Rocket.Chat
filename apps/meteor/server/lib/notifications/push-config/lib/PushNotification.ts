@@ -20,6 +20,7 @@ type PushNotificationData = {
 	payload: Record<string, any>;
 	badge: number;
 	category: string;
+	idOnly?: boolean;
 };
 
 type GetNotificationConfigParam = PushNotificationData & {
@@ -88,8 +89,19 @@ class PushNotification {
 		};
 	}
 
-	async send({ rid, uid, mid, roomName, username, message, payload, badge = 1, category }: PushNotificationData): Promise<void> {
-		const idOnly = settings.get<boolean>('Push_request_content_from_server');
+	async send({
+		rid,
+		uid,
+		mid,
+		roomName,
+		username,
+		message,
+		payload,
+		badge = 1,
+		category,
+		idOnly: forcedIdOnly,
+	}: PushNotificationData): Promise<void> {
+		const idOnly = forcedIdOnly ?? settings.get<boolean>('Push_request_content_from_server');
 		const config = this.getNotificationConfig({
 			rid,
 			uid,

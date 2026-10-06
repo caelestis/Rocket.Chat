@@ -40,6 +40,7 @@ module.exports = {
 		'server/meteor-methods/**/*.spec.ts',
 		'server/lib/omnichannel/**/*.spec.ts',
 		'server/lib/notifications/push/**/*.spec.ts',
+		'server/lib/notifications/reactions/**/*.spec.ts',
 		'server/lib/utils/**/*.spec.ts',
 		'lib/videoConference/*.spec.ts',
 		'server/services/video-conference/**/*.spec.ts',

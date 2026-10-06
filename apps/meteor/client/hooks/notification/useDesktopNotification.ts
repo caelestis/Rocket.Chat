@@ -3,6 +3,7 @@ import { useStableCallback } from '@rocket.chat/fuselage-hooks';
 import { useUser } from '@rocket.chat/ui-contexts';
 
 import { useNotification } from './useNotification';
+import { withQuotedMessage } from './withQuotedMessage';
 import { RoomManager } from '../../lib/RoomManager';
 import { e2e } from '../../lib/e2ee';
 import { getAvatarAsPng } from '../../lib/utils/getAvatarAsPng';
@@ -29,7 +30,7 @@ export const useDesktopNotification = () => {
 			if (e2eRoom) {
 				const decrypted = await e2eRoom.decrypt(message.content);
 				// TODO(@cardoso): review backward compatibility
-				notification.text = decrypted.msg ?? '';
+				notification.text = notification.payload.reaction ? withQuotedMessage(notification.text, decrypted.msg) : (decrypted.msg ?? '');
 			}
 		}
 

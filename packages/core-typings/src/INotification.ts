@@ -20,6 +20,8 @@ export interface INotificationItemPush {
 		message: string;
 		badge: number;
 		category: string;
+		/** Forces the push to carry its own text instead of asking the app to fetch the message. */
+		idOnly?: boolean;
 	};
 }
 
@@ -78,6 +80,8 @@ export interface INotificationDesktop {
 			t?: IMessage['t'];
 			content?: IMessage['content'];
 		};
+		/** Set when the notification is about a reaction: the text is kept and a decrypted message is only quoted after it. */
+		reaction?: string;
 		audioNotificationValue: ISubscription['audioNotificationValue'];
 	};
 }
