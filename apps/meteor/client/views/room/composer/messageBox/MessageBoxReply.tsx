@@ -6,6 +6,7 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { QuoteAttachment } from '../../../../components/message/content/attachments/QuoteAttachment';
+import { useQuoteExcerpts } from '../../../../lib/quoteExcerpts';
 import AttachmentProvider from '../../../../providers/AttachmentProvider';
 import { useChat } from '../../contexts/ChatContext';
 
@@ -16,6 +17,8 @@ const MessageBoxReply = ({ reply }: MessageBoxReplyProps) => {
 	const chat = useChat();
 
 	const displayName = useUserDisplayName(reply?.u);
+	const excerpt = useQuoteExcerpts((state) => state.byMessage[reply._id]);
+	const clearExcerpt = useQuoteExcerpts((state) => state.clear);
 
 	const closeWrapperStyle = css`
 		position: absolute;
@@ -30,12 +33,12 @@ const MessageBoxReply = ({ reply }: MessageBoxReplyProps) => {
 					<QuoteAttachment
 						attachment={
 							{
-								text: reply.msg,
-								md: reply.md,
+								text: excerpt ?? reply.msg,
+								...(!excerpt && { md: reply.md }),
 								author_name: reply.alias || displayName,
 								author_icon: `/avatar/${reply.u.username}`,
 								ts: reply.ts,
-								attachments: reply?.attachments?.map((obj) => ({ ...obj, collapsed: true })),
+								attachments: excerpt ? [] : reply?.attachments?.map((obj) => ({ ...obj, collapsed: true })),
 								collapsed: true,
 							} as MessageQuoteAttachment
 						}
@@ -45,6 +48,7 @@ const MessageBoxReply = ({ reply }: MessageBoxReplyProps) => {
 					className={closeWrapperStyle}
 					data-mid={reply._id}
 					onClick={(): void => {
+						clearExcerpt(reply._id);
 						chat?.composer?.dismissQuotedMessage(reply._id);
 					}}
 				>

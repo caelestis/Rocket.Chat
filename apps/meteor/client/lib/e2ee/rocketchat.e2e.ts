@@ -737,6 +737,7 @@ class E2E extends Emitter {
 				}
 
 				const [msgId, ...extraMsgIds] = urlObj.searchParams.getAll('msg');
+				const excerpt = urlObj.searchParams.get('excerpt') ?? undefined;
 
 				// skip if the msg param is missing, empty, or duplicated
 				if (!msgId || extraMsgIds.length) {
@@ -765,6 +766,7 @@ class E2E extends Emitter {
 					url,
 					useRealName,
 					getUserAvatarURL(decryptedQuoteMessage.u.username || '') as string,
+					excerpt,
 				);
 
 				message.attachments.push(limitQuoteChain(quoteAttachment, settings.peek('Message_QuoteChainLimit') ?? 2));

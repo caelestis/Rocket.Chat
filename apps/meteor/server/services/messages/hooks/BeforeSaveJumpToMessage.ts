@@ -102,13 +102,13 @@ export class BeforeSaveJumpToMessage {
 					return;
 				}
 
-				const { msg: msgId } = QueryString.parse(urlObj.query);
+				const { msg: msgId, excerpt } = QueryString.parse(urlObj.query);
 
 				if (typeof msgId !== 'string') {
 					return;
 				}
 
-				return { msgId, url: item.url };
+				return { msgId, url: item.url, ...(typeof excerpt === 'string' && excerpt && { excerpt }) };
 			})
 			.filter(Boolean);
 
@@ -159,7 +159,15 @@ export class BeforeSaveJumpToMessage {
 
 			item.ignoreParse = true;
 
-			quotes.push(createQuoteAttachment(messageFromUrl, item.url, useRealName, this.getUserAvatarURL(messageFromUrl.u.username)));
+			quotes.push(
+				createQuoteAttachment(
+					messageFromUrl,
+					item.url,
+					useRealName,
+					this.getUserAvatarURL(messageFromUrl.u.username),
+					linkedMessage.excerpt,
+				),
+			);
 		}
 
 		if (quotes.length > 0) {

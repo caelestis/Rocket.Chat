@@ -7,6 +7,8 @@ import {
 } from '@rocket.chat/core-typings';
 import { useTranslation } from 'react-i18next';
 
+import { getSelectedMessageExcerpt } from '../../../../../lib/getSelectedMessageExcerpt';
+import { useQuoteExcerpts } from '../../../../../lib/quoteExcerpts';
 import { useChat } from '../../../../../views/room/contexts/ChatContext';
 import { useRoom } from '../../../../../views/room/contexts/RoomContext';
 import { useMessageListAutoTranslate } from '../../../list/MessageListContext';
@@ -46,6 +48,13 @@ const QuoteMessageAction = ({ message, subscription }: QuoteMessageActionProps) 
 						message.translations && autoTranslateOptions.autoTranslateLanguage
 							? message.translations[autoTranslateOptions.autoTranslateLanguage]
 							: message.msg;
+				}
+
+				const excerpt = getSelectedMessageExcerpt(message._id);
+				if (excerpt) {
+					useQuoteExcerpts.getState().set(message._id, excerpt);
+				} else {
+					useQuoteExcerpts.getState().clear(message._id);
 				}
 
 				chat?.composer?.quoteMessage(message);
