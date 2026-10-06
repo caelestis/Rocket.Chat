@@ -15,6 +15,7 @@ import { useDiscussionsRoomAction } from './hooks/roomActions/useDiscussionsRoom
 import { useE2EERoomAction } from './hooks/roomActions/useE2EERoomAction';
 import { useExportMessagesRoomAction } from './hooks/roomActions/useExportMessagesRoomAction';
 import { useGameCenterRoomAction } from './hooks/roomActions/useGameCenterRoomAction';
+import { useJumpToDateRoomAction } from './hooks/roomActions/useJumpToDateRoomAction';
 import { useMediaCallRoomAction } from './hooks/roomActions/useMediaCallRoomAction';
 import { useMembersListRoomAction } from './hooks/roomActions/useMembersListRoomAction';
 import { useMentionsRoomAction } from './hooks/roomActions/useMentionsRoomAction';
@@ -59,6 +60,7 @@ export const roomActionHooks = [
 	usePinnedMessagesRoomAction,
 	usePushNotificationsRoomAction,
 	useRocketSearchRoomAction,
+	useJumpToDateRoomAction,
 	useRoomInfoRoomAction,
 	useStarredMessagesRoomAction,
 	useTeamChannelsRoomAction,

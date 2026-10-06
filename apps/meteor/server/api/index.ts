@@ -32,6 +32,7 @@ import './v1/roles';
 import './v1/rooms';
 import './v1/rooms-media-confirm-multiple';
 import './v1/transcription';
+import './v1/chat-find-message-by-date';
 import './v1/settings';
 import './v1/setupWizard';
 import './v1/stats';
