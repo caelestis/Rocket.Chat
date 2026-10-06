@@ -2,6 +2,10 @@ ARG DENO_VERSION="1.37.1"
 
 FROM denoland/deno:bin-${DENO_VERSION} as deno
 
+# Static ffmpeg for voice message transcription: bullseye's apt ffmpeg is no longer
+# installable since its security archive moved, and a static binary has no deps.
+FROM mwader/static-ffmpeg:7.1 as ffmpeg
+
 FROM node:24.15.0-bullseye-slim
 
 LABEL maintainer="buildmaster@rocket.chat"
@@ -12,9 +16,10 @@ RUN groupadd -g 65533 -r rocketchat \
     && mkdir -p /app/uploads \
     && chown rocketchat:rocketchat /app/uploads \
     && apt-get update \
-    && apt-get install -y --no-install-recommends fontconfig ffmpeg
+    && apt-get install -y --no-install-recommends fontconfig
 
 COPY --from=deno /deno /bin/deno
+COPY --from=ffmpeg /ffmpeg /usr/local/bin/ffmpeg
 
 # --chown requires Docker 17.12 and works only on Linux
 ADD --chown=rocketchat:rocketchat . /app

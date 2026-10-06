@@ -71,7 +71,9 @@ tags of one upstream release.
 ## What the image adds over upstream
 
 - `ffmpeg`, which voice message transcription needs for audio recorded by the mobile
-  apps (`docs/features/voice-transcription.md`).
+  apps (`docs/features/voice-transcription.md`). It is copied as a static binary from
+  the `mwader/static-ffmpeg` image, because the Debian release upstream builds on no
+  longer serves ffmpeg through apt.
 
 Everything else is code. First-run settings the features add (`Transcription_*`,
 `Notifications_On_Reactions`) register themselves on startup with safe defaults.
