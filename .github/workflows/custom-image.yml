@@ -59,7 +59,7 @@ jobs:
         run: |
           yarn build:ci
           find /tmp/dist/bundle -type f -name '*.d.ts' -delete
-          cp .docker/Dockerfile.debian /tmp/dist/Dockerfile
+          cp .docker/Dockerfile.alpine /tmp/dist/Dockerfile
 
       - name: Pack bundle
         run: tar -C /tmp/dist -czf /tmp/Rocket.Chat.tar.gz bundle Dockerfile
@@ -106,6 +106,7 @@ jobs:
         with:
           context: /tmp/build
           file: /tmp/build/Dockerfile
+          target: release-standard
           platforms: linux/amd64
           push: true
           tags: |

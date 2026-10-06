@@ -21,12 +21,12 @@ yarn build
 rm -rf "$DIST"
 (cd apps/meteor && METEOR_DEBUG_BUILD=1 METEOR_DISABLE_OPTIMISTIC_CACHING=1 meteor build --verbose --server-only --directory "$DIST")
 find "$DIST/bundle" -type f -name '*.d.ts' -delete
-cp apps/meteor/.docker/Dockerfile.debian "$DIST/Dockerfile"
+cp apps/meteor/.docker/Dockerfile.alpine "$DIST/Dockerfile"
 
 if [ "$PUSH" = "--push" ]; then
-	docker buildx build --platform linux/amd64 --push -t "$IMAGE" "$DIST"
+	docker buildx build --platform linux/amd64 --target release-standard --push -t "$IMAGE" "$DIST"
 else
-	docker buildx build --platform linux/amd64 --load -t "$IMAGE" "$DIST"
+	docker buildx build --platform linux/amd64 --target release-standard --load -t "$IMAGE" "$DIST"
 fi
 
 echo "Built $IMAGE"

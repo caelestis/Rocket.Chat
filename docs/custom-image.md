@@ -36,8 +36,9 @@ git push fork master --force-with-lease && git push fork 8.10.0-custom.1
 ### On GitHub (recommended)
 
 `.github/workflows/custom-image.yml` runs on every `*-custom.*` tag pushed to the fork.
-It builds the Meteor bundle the same way upstream CI does, builds
-`apps/meteor/.docker/Dockerfile.debian` from it and pushes
+It builds the Meteor bundle the same way upstream CI does, builds the
+`release-standard` target of `apps/meteor/.docker/Dockerfile.alpine` from it, the same
+file the official image comes from, and pushes
 `ghcr.io/<owner>/rocket.chat:<tag>` (plus `:latest`) to GitHub Container Registry
 with the repository's own token. No secrets to configure. A full build takes about
 40 minutes on the free runners.
@@ -72,8 +73,11 @@ tags of one upstream release.
 
 - `ffmpeg`, which voice message transcription needs for audio recorded by the mobile
   apps (`docs/features/voice-transcription.md`). It is copied as a static binary from
-  the `mwader/static-ffmpeg` image, because the Debian release upstream builds on no
-  longer serves ffmpeg through apt.
+  the `mwader/static-ffmpeg` image, so no package repository is involved.
+
+`Dockerfile.debian` is left untouched and is not used: the Debian release it is based
+on no longer serves its security archive, so even upstream's own package list fails
+to install there today.
 
 Everything else is code. First-run settings the features add (`Transcription_*`,
 `Notifications_On_Reactions`) register themselves on startup with safe defaults.
