@@ -1,5 +1,5 @@
 import type { IMessageSearchProvider } from '@rocket.chat/core-typings';
-import { Box, Field, FieldLabel, FieldHint, Icon, TextInput, ToggleSwitch, Callout } from '@rocket.chat/fuselage';
+import { Box, Field, FieldLabel, FieldHint, Icon, TextInput, ToggleSwitch } from '@rocket.chat/fuselage';
 import { useDebouncedCallback, useStableCallback } from '@rocket.chat/fuselage-hooks';
 import type { TranslationKey } from '@rocket.chat/ui-contexts';
 import DOMPurify from 'dompurify';
@@ -7,7 +7,7 @@ import { useEffect, useId } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { getRoomTypeTranslation } from '../../../../../lib/getRoomTypeTranslation';
+import EncryptedRoomSearchStatus from './EncryptedRoomSearchStatus';
 import { useRoom } from '../../../contexts/RoomContext';
 
 export type MessageSearchFormProps = {
@@ -45,7 +45,7 @@ const MessageSearchForm = ({ provider, onSearch, searchListId, isSuccess }: Mess
 		debouncedOnSearch({ searchText, globalSearch });
 	}, [debouncedOnSearch, searchText, globalSearch]);
 
-	const globalSearchEnabled = provider.settings.GlobalSearchEnabled;
+	const globalSearchEnabled = provider.settings.GlobalSearchEnabled && !room.encrypted;
 	const globalSearchToggleId = useId();
 
 	const { t } = useTranslation();
@@ -71,12 +71,7 @@ const MessageSearchForm = ({ provider, onSearch, searchListId, isSuccess }: Mess
 					<ToggleSwitch id={globalSearchToggleId} {...register('globalSearch')} />
 				</Field>
 			)}
-			{room.encrypted && (
-				<Callout type='warning' marginBlockStart={12} icon='circle-exclamation'>
-					<Box fontScale='p2b'>{t('Encrypted_RoomType', { roomType: getRoomTypeTranslation(room).toLowerCase() })}</Box>
-					{t('Encrypted_content_cannot_be_searched')}
-				</Callout>
-			)}
+			{room.encrypted && <EncryptedRoomSearchStatus room={room} />}
 		</Box>
 	);
 };

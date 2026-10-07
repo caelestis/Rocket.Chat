@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { Virtuoso } from 'react-virtuoso';
 
 import MessageSearchForm from './components/MessageSearchForm';
+import { useEncryptedMessageSearch } from './hooks/useEncryptedMessageSearch';
 import { useMessageSearchProviderQuery } from './hooks/useMessageSearchProviderQuery';
 import { useMessageSearchQuery } from './hooks/useMessageSearchQuery';
 import ResultsLiveRegion from '../../../../components/ResultsLiveRegion';
@@ -26,7 +27,7 @@ import { useFormatDate } from '../../../../hooks/useFormatDate';
 import MessageListErrorBoundary from '../../MessageList/MessageListErrorBoundary';
 import { isMessageNewDay } from '../../MessageList/lib/isMessageNewDay';
 import MessageListProvider from '../../MessageList/providers/MessageListProvider';
-import { useRoomSubscription } from '../../contexts/RoomContext';
+import { useRoom, useRoomSubscription } from '../../contexts/RoomContext';
 
 // TODO: Refactor this component to isolate the data from the visual
 const MessageSearchTab = () => {
@@ -42,8 +43,14 @@ const MessageSearchTab = () => {
 
 	const providerQuery = useMessageSearchProviderQuery();
 
+	const room = useRoom();
+	const encrypted = !!room.encrypted;
+
 	const [{ searchText, globalSearch }, handleSearch] = useState({ searchText: '', globalSearch: false });
-	const { isSuccess, data: messageSearchData, isPending } = useMessageSearchQuery({ searchText, limit, globalSearch });
+	// An encrypted room is searched in this browser over its decrypted history; the server only holds ciphertext.
+	const remote = useMessageSearchQuery({ searchText, limit, globalSearch, enabled: !encrypted });
+	const local = useEncryptedMessageSearch({ room, searchText, limit });
+	const { isSuccess, data: messageSearchData, isPending } = encrypted ? local : remote;
 	const itemCount = messageSearchData?.length ?? 0;
 
 	return (
